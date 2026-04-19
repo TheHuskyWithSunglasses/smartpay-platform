@@ -1,7 +1,10 @@
 package com.smartpay.merchant.controller;
 
+import com.smartpay.merchant.dto.LoginRequest;
+import com.smartpay.merchant.dto.LoginResponse;
 import com.smartpay.merchant.dto.RegisterMerchantRequest;
 import com.smartpay.merchant.dto.RegisterMerchantResponse;
+import com.smartpay.merchant.service.AuthService;
 import com.smartpay.merchant.service.MerchantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +21,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final MerchantService merchantService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterMerchantResponse> register(@Valid @RequestBody RegisterMerchantRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(merchantService.registerMerchant(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity
+                .ok()
+                .body(authService.login(request));
     }
 }
