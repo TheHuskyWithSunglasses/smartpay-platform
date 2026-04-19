@@ -14,10 +14,7 @@ spring:
       port: 6379
   liquibase:
     enabled: true
-  mvc:
-    problemdetails:
-      enabled: true
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expiration: ${JWT_EXPIRATION:86400000}
+      expiration-time: ${JWT_EXPIRATION:86400000}

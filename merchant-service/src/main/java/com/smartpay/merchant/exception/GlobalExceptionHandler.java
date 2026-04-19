@@ -16,15 +16,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleGenericError(Exception e, HttpServletRequest request) {
-        log.error(e.getMessage(), e);
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        problemDetail.setTitle("An unexpected error occurred");
-        problemDetail.setInstance(URI.create(request.getRequestURI()));
-        return problemDetail;
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationError(MethodArgumentNotValidException e, HttpServletRequest httpServletRequest) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -44,6 +35,15 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Email conflict");
         problemDetail.setDetail("The email used for registration is already taken");
         problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleGenericError(Exception e, HttpServletRequest request) {
+        log.error(e.getMessage(), e);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setTitle("An unexpected error occurred");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }
 }
