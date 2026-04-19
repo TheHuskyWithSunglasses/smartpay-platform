@@ -17,3 +17,7 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration: ${JWT_EXPIRATION:86400000}
