@@ -1,9 +1,6 @@
 package com.smartpay.merchant.controller;
 
-import com.smartpay.merchant.dto.LoginRequest;
-import com.smartpay.merchant.dto.LoginResponse;
-import com.smartpay.merchant.dto.RegisterMerchantRequest;
-import com.smartpay.merchant.dto.RegisterMerchantResponse;
+import com.smartpay.merchant.dto.*;
 import com.smartpay.merchant.service.AuthService;
 import com.smartpay.merchant.service.MerchantService;
 import jakarta.validation.Valid;
@@ -35,5 +32,12 @@ public class AuthController {
         return ResponseEntity
                 .ok()
                 .body(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity
+                .ok()
+                .body(authService.refresh(request));
     }
 }

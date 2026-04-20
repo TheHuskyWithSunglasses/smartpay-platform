@@ -1,9 +1,7 @@
 package com.smartpay.merchant.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
@@ -13,6 +11,8 @@ import java.util.UUID;
 @Table(name = "refresh_tokens")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RefreshToken {
 
     @Id
@@ -35,5 +35,4 @@ public class RefreshToken {
 
     @Column(nullable = false)
     private OffsetDateTime expiresAt;
-
 }

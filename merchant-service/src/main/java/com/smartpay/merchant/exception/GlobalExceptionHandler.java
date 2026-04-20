@@ -1,6 +1,7 @@
 package com.smartpay.merchant.exception;
 
 import com.smartpay.merchant.domain.exception.EmailAlreadyExistsException;
+import com.smartpay.merchant.domain.exception.InvalidRefreshTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,14 @@ public class GlobalExceptionHandler {
                         .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                                 .collect(Collectors.joining("; "));
         problemDetail.setDetail(errorDetail);
+        problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ProblemDetail handleInvalidRefreshToken(InvalidRefreshTokenException e, HttpServletRequest httpServletRequest) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+        problemDetail.setTitle("Invalid or expired refresh token");
         problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
         return problemDetail;
     }
