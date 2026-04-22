@@ -9,6 +9,7 @@ import com.smartpay.merchant.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,5 +31,10 @@ public class AuthService {
     public LoginResponse refresh(RefreshTokenRequest request) {
         RefreshToken refreshToken = refreshTokenService.verify(request.refreshToken());
         return new LoginResponse(jwtService.generateToken(refreshToken.getMerchant()), refreshTokenService.rotate(refreshToken));
+    }
+
+    public void logout() {
+        Merchant merchant = (Merchant) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        refreshTokenService.deleteRefreshTokensByMerchant(merchant);
     }
 }

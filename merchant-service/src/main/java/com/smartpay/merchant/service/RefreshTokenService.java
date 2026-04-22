@@ -78,4 +78,8 @@ public class RefreshTokenService {
         HexFormat hexFormat = HexFormat.of();
         return hexFormat.formatHex(hashBytes);
     }
+
+    public void deleteRefreshTokensByMerchant(Merchant merchant) {
+        refreshTokenRepository.deleteRefreshTokensByMerchant(merchant);
+    }
 }
