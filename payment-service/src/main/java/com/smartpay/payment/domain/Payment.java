@@ -40,7 +40,7 @@ public class Payment {
 
     @CreationTimestamp
     @Column(nullable = false)
-        private OffsetDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @Setter
     private OffsetDateTime processedAt;
