@@ -46,4 +46,11 @@ public class PaymentController {
                 .ok()
                 .body(paymentService.listPayments(merchantID, status, from, to, pageable));
     }
+
+    @PostMapping("/{id}/refund")
+    public ResponseEntity<PaymentResponse> refundPayment(@PathVariable("id") UUID paymentId) {
+        return ResponseEntity
+                .ok()
+                .body(paymentService.refundPayment(paymentId));
+    }
 }

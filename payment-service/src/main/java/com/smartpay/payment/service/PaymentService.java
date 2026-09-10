@@ -2,6 +2,7 @@ package com.smartpay.payment.service;
 
 import com.smartpay.payment.domain.Payment;
 import com.smartpay.payment.domain.PaymentStatus;
+import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
 import com.smartpay.payment.dto.CreatePaymentRequest;
 import com.smartpay.payment.dto.PaymentResponse;
@@ -15,7 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static com.smartpay.payment.mapper.PaymentMapper.toPaymentEntity;
@@ -59,5 +59,20 @@ public class PaymentService {
         }
 
         return paymentRepository.findAll(spec, pageable).map(PaymentMapper::toPaymentResponse);
+    }
+
+    public PaymentResponse refundPayment(UUID paymentId) {
+        return paymentRepository.findById(paymentId)
+                .map(payment -> {
+                    if (!payment.getStatus().canTransitionTo(PaymentStatus.REFUNDED)) {
+                        throw new InvalidStateTransitionException("This payment can't be refunded!");
+                    }
+
+                    payment.setStatus(PaymentStatus.REFUNDED);
+                    paymentRepository.save(payment);
+
+                    return toPaymentResponse(payment);
+                })
+                .orElseThrow(() -> new PaymentNotFoundException(paymentId.toString()));
     }
 }
