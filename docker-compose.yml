@@ -7,11 +7,24 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: smartpay
       POSTGRES_DB: smartpay
+      POSTGRES_USER: smartpay
       POSTGRES_PASSWORD: example
     ports:
       - "5432:5432"
+  payment-db:
+    image: postgres:15
+    restart: always
+    networks:
+      - smartpay-network
+    volumes:
+      - payment_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: smartpay_payments
+      POSTGRES_USER: smartpay
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5433:5432"
   redis:
     image: redis:7
     networks:
@@ -21,6 +34,7 @@ services:
     restart: always
 volumes:
   postgres_data:
+  payment_postgres_data:
 networks:
   smartpay-network:
     driver: bridge
