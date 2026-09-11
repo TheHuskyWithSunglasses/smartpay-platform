@@ -3,6 +3,7 @@ package com.smartpay.payment.controller;
 import com.smartpay.payment.domain.PaymentStatus;
 import com.smartpay.payment.dto.CreatePaymentRequest;
 import com.smartpay.payment.dto.PaymentResponse;
+import com.smartpay.payment.dto.PaymentStatsResponse;
 import com.smartpay.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,11 @@ public class PaymentController {
         return ResponseEntity
                 .ok()
                 .body(paymentService.refundPayment(paymentId));
+      
+    @GetMapping("/stats")
+    public ResponseEntity<PaymentStatsResponse> getPaymentStats(@RequestHeader("X-Merchant-Id") UUID merchantID) {
+        return ResponseEntity
+                .ok()
+                .body(paymentService.getStats(merchantID));
     }
 }
