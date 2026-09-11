@@ -37,11 +37,11 @@ public class PaymentMapper {
                 .build();
     }
 
-    private static BigDecimal toDecimalAmount(Long amount) {
+    public static BigDecimal toDecimalAmount(Long amount) {
         return BigDecimal.valueOf(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
     }
 
-    private static Long toLongAmount(BigDecimal amount) {
+    public static Long toLongAmount(BigDecimal amount) {
         return amount.multiply(new BigDecimal(100)).longValue();
     }
 }
