@@ -5,6 +5,7 @@ import com.smartpay.payment.domain.PaymentStatus;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
 import com.smartpay.payment.dto.CreatePaymentRequest;
 import com.smartpay.payment.dto.PaymentResponse;
+import com.smartpay.payment.dto.PaymentStatsResponse;
 import com.smartpay.payment.mapper.PaymentMapper;
 import com.smartpay.payment.repository.PaymentRepository;
 import com.smartpay.payment.specification.PaymentSpecifications;
@@ -14,9 +15,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.smartpay.payment.mapper.PaymentMapper.toPaymentEntity;
 import static com.smartpay.payment.mapper.PaymentMapper.toPaymentResponse;
@@ -59,5 +64,24 @@ public class PaymentService {
         }
 
         return paymentRepository.findAll(spec, pageable).map(PaymentMapper::toPaymentResponse);
+    }
+
+    public PaymentStatsResponse getStats(UUID merchantId) {
+        List<Object[]> results = paymentRepository.countByMerchantIdGroupByStatus(merchantId);
+        Long totalTransactions = paymentRepository.getTransactionsCount(merchantId);
+        Long totalVolume = paymentRepository.getTotalVolume(merchantId);
+        BigDecimal volume = totalVolume != null ? PaymentMapper.toDecimalAmount(totalVolume) : BigDecimal.ZERO;
+
+        Map<PaymentStatus, Long> countPerStatus = results.stream()
+                .collect(Collectors.toMap(
+                        row -> (PaymentStatus) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        return new PaymentStatsResponse(
+                volume,
+                totalTransactions,
+                countPerStatus
+        );
     }
 }
