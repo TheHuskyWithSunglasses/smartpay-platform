@@ -1,5 +1,6 @@
 package com.smartpay.payment.exception;
 
+import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleInvalidRefreshToken(PaymentNotFoundException e, HttpServletRequest httpServletRequest) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problemDetail.setTitle("Payment Not Found");
+        problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidStateTransitionException.class)
+    public ProblemDetail handleInvalidStateTransition(InvalidStateTransitionException e, HttpServletRequest httpServletRequest) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setTitle("Invalid State Transition");
         problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
         return problemDetail;
     }
