@@ -53,6 +53,7 @@ public class PaymentController {
         return ResponseEntity
                 .ok()
                 .body(paymentService.refundPayment(paymentId));
+    }
       
     @GetMapping("/stats")
     public ResponseEntity<PaymentStatsResponse> getPaymentStats(@RequestHeader("X-Merchant-Id") UUID merchantID) {
