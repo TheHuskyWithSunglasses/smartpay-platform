@@ -1,5 +1,6 @@
 package com.smartpay.merchant.security;
 
+import com.smartpay.merchant.domain.Merchant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -32,7 +33,10 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Merchant merchant = (Merchant) userDetails;
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("merchantId", merchant.getId().toString());
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

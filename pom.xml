@@ -17,6 +17,7 @@
         <module>merchant-service</module>
         <module>payment-service</module>
         <module>notification-service</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>
@@ -54,6 +55,13 @@
                 <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2024.0.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
