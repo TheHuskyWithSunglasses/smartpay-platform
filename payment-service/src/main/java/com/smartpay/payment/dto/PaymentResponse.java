@@ -6,5 +6,14 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public record PaymentResponse(UUID id, PaymentStatus status, BigDecimal amount, String currency, String description, String idempotencyKey, OffsetDateTime createdAt, OffsetDateTime processedAt) {
+public record PaymentResponse(
+        UUID id,
+        PaymentStatus status,
+        BigDecimal amount,
+        String currency,
+        String description,
+        String idempotencyKey,
+        String webhookUrl,
+        OffsetDateTime createdAt,
+        OffsetDateTime processedAt) {
 }

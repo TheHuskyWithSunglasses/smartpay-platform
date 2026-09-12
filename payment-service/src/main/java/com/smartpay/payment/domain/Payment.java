@@ -3,6 +3,7 @@ package com.smartpay.payment.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -37,6 +38,9 @@ public class Payment {
     private PaymentStatus status;
 
     private String description;
+
+    @Column(nullable = false)
+    private String webhookUrl;
 
     @CreationTimestamp
     @Column(nullable = false)

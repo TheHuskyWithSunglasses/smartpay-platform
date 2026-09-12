@@ -14,7 +14,8 @@ public record PaymentEvent(
         PaymentStatus status,
         BigDecimal amount,
         String currency,
-        OffsetDateTime occurredAt
+        OffsetDateTime occurredAt,
+        String webhookUrl
 ) {
 }
 
