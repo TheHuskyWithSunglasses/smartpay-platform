@@ -1,6 +1,7 @@
 package com.smartpay.payment.controller;
 
 import com.smartpay.payment.domain.PaymentStatus;
+import com.smartpay.payment.dto.CallbackRequest;
 import com.smartpay.payment.dto.CreatePaymentRequest;
 import com.smartpay.payment.dto.PaymentResponse;
 import com.smartpay.payment.dto.PaymentStatsResponse;
@@ -60,5 +61,13 @@ public class PaymentController {
         return ResponseEntity
                 .ok()
                 .body(paymentService.getStats(merchantID));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<PaymentResponse> callbackStatusUpdate(@PathVariable("id") UUID paymentId,
+                                                                @Valid @RequestBody CallbackRequest callbackRequest) {
+        return ResponseEntity
+                .ok()
+                .body(paymentService.callbackStatusUpdate(paymentId, callbackRequest));
     }
 }

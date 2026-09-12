@@ -1,6 +1,5 @@
 package com.smartpay.notification.dto.kafka;
 
-
 import com.smartpay.notification.domain.PaymentStatus;
 
 import java.math.BigDecimal;
@@ -15,7 +14,8 @@ public record PaymentEvent(
         PaymentStatus status,
         BigDecimal amount,
         String currency,
-        OffsetDateTime occurredAt
+        OffsetDateTime occurredAt,
+        String webhookUrl
 ) {
 }
 

@@ -4,11 +4,14 @@ import com.smartpay.payment.domain.Payment;
 import com.smartpay.payment.domain.PaymentStatus;
 import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
+import com.smartpay.payment.dto.CallbackRequest;
 import com.smartpay.payment.dto.CreatePaymentRequest;
 import com.smartpay.payment.dto.PaymentResponse;
 import com.smartpay.payment.dto.PaymentStatsResponse;
+import com.smartpay.payment.dto.kafka.PaymentEvent;
 import com.smartpay.payment.mapper.PaymentMapper;
 import com.smartpay.payment.repository.PaymentRepository;
+import com.smartpay.payment.service.kafka.PaymentEventProducer;
 import com.smartpay.payment.specification.PaymentSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,18 +23,17 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.smartpay.payment.mapper.PaymentMapper.toPaymentEntity;
-import static com.smartpay.payment.mapper.PaymentMapper.toPaymentResponse;
+import static com.smartpay.payment.mapper.PaymentMapper.*;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PaymentEventProducer paymentEventProducer;
 
     public PaymentResponse createPayment(CreatePaymentRequest createPaymentRequest, UUID merchantId) {
         return paymentRepository.findByIdempotencyKey(createPaymentRequest.idempotencyKey())
@@ -70,12 +72,15 @@ public class PaymentService {
     public PaymentResponse refundPayment(UUID paymentId) {
         return paymentRepository.findById(paymentId)
                 .map(payment -> {
-                    if (!payment.getStatus().canTransitionTo(PaymentStatus.REFUNDED)) {
+                    PaymentStatus paymentStatus = payment.getStatus();
+                    if (!paymentStatus.canTransitionTo(PaymentStatus.REFUNDED)) {
                         throw new InvalidStateTransitionException("This payment can't be refunded!");
                     }
 
                     payment.setStatus(PaymentStatus.REFUNDED);
                     paymentRepository.save(payment);
+                    PaymentEvent paymentEvent = toPaymentEvent(payment, paymentStatus);
+                    paymentEventProducer.publish(paymentEvent);
 
                     return toPaymentResponse(payment);
                 })
@@ -99,5 +104,21 @@ public class PaymentService {
                 totalTransactions,
                 countPerStatus
         );
+    }
+
+    public PaymentResponse callbackStatusUpdate(UUID paymentId, CallbackRequest callbackRequest) {
+        return paymentRepository.findById(paymentId)
+                .map(payment ->  {
+                    PaymentStatus previousPaymentStatus = payment.getStatus();
+
+                    if (!previousPaymentStatus.canTransitionTo(callbackRequest.status())) {
+                        throw new InvalidStateTransitionException(String.format("This payment can not transition from %s to %s", previousPaymentStatus, callbackRequest.status()));
+                    }
+
+                    payment.setStatus(callbackRequest.status());
+                    paymentRepository.save(payment);
+                    paymentEventProducer.publish(toPaymentEvent(payment, previousPaymentStatus));
+                    return toPaymentResponse(payment);
+                }).orElseThrow(() -> new PaymentNotFoundException(paymentId.toString()));
     }
 }
