@@ -73,10 +73,6 @@ public class PaymentService {
         return paymentRepository.findById(paymentId)
                 .map(payment -> {
                     PaymentStatus paymentStatus = payment.getStatus();
-                    if (!paymentStatus.canTransitionTo(PaymentStatus.REFUNDED)) {
-                        throw new InvalidStateTransitionException("This payment can't be refunded!");
-                    }
-
                     payment.setStatus(PaymentStatus.REFUNDED);
                     paymentRepository.save(payment);
                     PaymentEvent paymentEvent = toPaymentEvent(payment, paymentStatus);
@@ -110,11 +106,6 @@ public class PaymentService {
         return paymentRepository.findById(paymentId)
                 .map(payment ->  {
                     PaymentStatus previousPaymentStatus = payment.getStatus();
-
-                    if (!previousPaymentStatus.canTransitionTo(callbackRequest.status())) {
-                        throw new InvalidStateTransitionException(String.format("This payment can not transition from %s to %s", previousPaymentStatus, callbackRequest.status()));
-                    }
-
                     payment.setStatus(callbackRequest.status());
                     paymentRepository.save(payment);
                     paymentEventProducer.publish(toPaymentEvent(payment, previousPaymentStatus));

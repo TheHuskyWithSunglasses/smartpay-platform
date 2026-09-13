@@ -1,5 +1,6 @@
 package com.smartpay.payment.domain;
 
+import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,7 +33,6 @@ public class Payment {
     @Column(nullable = false, length = 3)
     private String currency;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
@@ -48,5 +48,12 @@ public class Payment {
 
     @Setter
     private OffsetDateTime processedAt;
+
+    public void setStatus(PaymentStatus newStatus) {
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new InvalidStateTransitionException(String.format("Payment status '%s' can not transition to '%s'", this.status, newStatus));
+        }
+        this.status = newStatus;
+    }
 }
 
