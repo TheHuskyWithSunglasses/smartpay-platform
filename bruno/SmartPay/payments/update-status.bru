@@ -1,0 +1,25 @@
+meta {
+  name: Update Payment Status (Callback)
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/payments/{{paymentId}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "PROCESSING"
+  }
+}

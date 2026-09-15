@@ -18,8 +18,8 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID>, JpaSpec
     Long getTotalVolume(@Param("merchantId") UUID merchantId);
 
     @Query("SELECT COUNT(p) AS totalTransactions FROM Payment AS p WHERE p.merchantId = :merchantId")
-    Long getTransactionsCount(UUID merchantId);
+    Long getTransactionsCount(@Param("merchantId") UUID merchantId);
 
     @Query("SELECT p.status, COUNT(p) AS totalPayments FROM Payment AS p WHERE p.merchantId = :merchantId GROUP BY p.status")
-    List<Object[]> countByMerchantIdGroupByStatus(UUID merchantId);
+    List<Object[]> countByMerchantIdGroupByStatus(@Param("merchantId") UUID merchantId);
 }

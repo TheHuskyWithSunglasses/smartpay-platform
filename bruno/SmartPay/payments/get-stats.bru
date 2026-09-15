@@ -1,0 +1,15 @@
+meta {
+  name: Get Payment Stats
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/payments/stats
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
