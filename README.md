@@ -237,17 +237,27 @@ PATCH /api/v1/payments/{id}/status
 
 ---
 
-## Running Tests
+## Testing
 
+The project uses a two-tier testing strategy:
+
+**Unit tests** (JUnit 5 + Mockito)
+- Payment state machine transitions
+- Service layer business logic (idempotency, state validation)
+- JWT authentication filter
+- Webhook delivery retry logic
+
+**Integration tests** (Testcontainers)
+- Repository queries against real PostgreSQL 15
+- Liquibase migrations verified on every test run
+- No H2 in-memory substitutes — tests reflect production behaviour exactly
+
+Run all tests:
 ```bash
-mvn test -pl merchant-service
-mvn test -pl payment-service
-mvn test -pl notification-service
-mvn test -pl api-gateway
+mvn clean verify
 ```
 
-Or all at once:
-
+Run a specific module:
 ```bash
-mvn test
-```platform
+mvn test -pl payment-service
+```

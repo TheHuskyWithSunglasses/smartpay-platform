@@ -1,0 +1,25 @@
+meta {
+  name: Update Payment Status (COMPLETED)
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/payments/{{paymentId}}/status
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "COMPLETED"
+  }
+}

@@ -2,7 +2,6 @@ package com.smartpay.payment.service;
 
 import com.smartpay.payment.domain.Payment;
 import com.smartpay.payment.domain.PaymentStatus;
-import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
 import com.smartpay.payment.dto.CallbackRequest;
 import com.smartpay.payment.dto.CreatePaymentRequest;
@@ -23,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,15 +34,32 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentEventProducer paymentEventProducer;
+    private final IdempotencyService idempotencyService;
 
     public PaymentResponse createPayment(CreatePaymentRequest createPaymentRequest, UUID merchantId) {
-        return paymentRepository.findByIdempotencyKey(createPaymentRequest.idempotencyKey())
-                .map(PaymentMapper::toPaymentResponse)
-                .orElseGet(() -> {
-                    Payment payment = toPaymentEntity(createPaymentRequest, merchantId, PaymentStatus.PENDING);
-                    paymentRepository.save(payment);
-                    return toPaymentResponse(payment);
-                });
+        String idempotencyKey = createPaymentRequest.idempotencyKey();
+
+        // Check Redis cache first
+        Optional<PaymentResponse> cached = idempotencyService.getIfPresent(idempotencyKey);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        // Check database
+        Optional<Payment> existing = paymentRepository.findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            PaymentResponse response = PaymentMapper.toPaymentResponse(existing.get());
+            idempotencyService.store(idempotencyKey, response);
+            return response;
+        }
+
+        // Create new payment
+        Payment payment = toPaymentEntity(createPaymentRequest, merchantId, PaymentStatus.PENDING);
+        paymentRepository.save(payment);
+        paymentEventProducer.publish(toPaymentEvent(payment, null));
+        PaymentResponse response = toPaymentResponse(payment);
+        idempotencyService.store(idempotencyKey, response);
+        return response;
     }
 
     public PaymentResponse getPayment(UUID paymentId) {

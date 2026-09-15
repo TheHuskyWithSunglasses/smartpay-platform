@@ -1,0 +1,15 @@
+meta {
+  name: Refund Payment
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/payments/{{paymentId}}/refund
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

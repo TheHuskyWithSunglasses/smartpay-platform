@@ -1,0 +1,35 @@
+meta {
+  name: Create Payment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/payments
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "amount": 25.50,
+    "currency": "EUR",
+    "idempotencyKey": "{{$randomUUID}}",
+    "description": "Test payment",
+    "webhookUrl": "https://webhook.site/adb66ca4-1145-46d1-9cb1-69c40a8bac10"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar("paymentId", res.body.id);
+  }
+}

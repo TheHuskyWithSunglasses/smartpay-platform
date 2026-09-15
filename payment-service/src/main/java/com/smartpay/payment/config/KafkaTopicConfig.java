@@ -1,4 +1,4 @@
-package com.smartpay.payment.config.kafka;
+package com.smartpay.payment.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
