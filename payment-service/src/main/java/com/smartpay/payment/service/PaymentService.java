@@ -2,7 +2,6 @@ package com.smartpay.payment.service;
 
 import com.smartpay.payment.domain.Payment;
 import com.smartpay.payment.domain.PaymentStatus;
-import com.smartpay.payment.domain.exception.InvalidStateTransitionException;
 import com.smartpay.payment.domain.exception.PaymentNotFoundException;
 import com.smartpay.payment.dto.CallbackRequest;
 import com.smartpay.payment.dto.CreatePaymentRequest;
