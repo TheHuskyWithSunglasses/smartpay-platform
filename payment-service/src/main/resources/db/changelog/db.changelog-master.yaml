@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/changes/V1__create_payments_table.sql
+  - include:
+      file: db/changelog/changes/V2__add_webhook_url_to_payments.sql

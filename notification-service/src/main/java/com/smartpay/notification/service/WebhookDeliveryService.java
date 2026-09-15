@@ -8,12 +8,14 @@ import com.smartpay.notification.dto.kafka.PaymentEvent;
 import com.smartpay.notification.mapper.WebhookDeliveryMapper;
 import com.smartpay.notification.repository.WebhookDeliveryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.time.OffsetDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WebhookDeliveryService {
@@ -22,6 +24,11 @@ public class WebhookDeliveryService {
     private final RestClient restClient;
 
     public void sendNotification(PaymentEvent event) {
+        if (webhookDeliveryRepository.existsByPaymentIdAndStatus(event.paymentId(), WebhookStatus.SUCCESS)) {
+            log.info("Webhook already delivered for payment: {}", event.paymentId());
+            return;
+        }
+
         String eventPayload;
         try {
             eventPayload = objectMapper.writeValueAsString(event);
@@ -50,6 +57,7 @@ public class WebhookDeliveryService {
             if (attemptDelivery(url, eventPayload)) {
                 webhookDelivery.setStatus(WebhookStatus.SUCCESS);
                 webhookDeliveryRepository.save(webhookDelivery);
+                log.info("Webhook delivered successfully to: {} for payment: {}", url, webhookDelivery.getPaymentId());
                 return;
             } else {
                 // if failed and not last attempt → wait delays[attempt]
@@ -61,6 +69,7 @@ public class WebhookDeliveryService {
                     }
                 } else {
                     // if failed and last attempt → DEAD, save
+                    log.error("Webhook delivery DEAD after {} attempts for payment: {}", maxAttempts, webhookDelivery.getPaymentId());
                     webhookDelivery.setStatus(WebhookStatus.DEAD);
                     webhookDeliveryRepository.save(webhookDelivery);
                 }
@@ -69,6 +78,7 @@ public class WebhookDeliveryService {
     }
 
     private boolean attemptDelivery(String url, String eventPayload) {
+        log.info("Attempting delivery to: {}", url);
         try {
             restClient.post()
                     .uri(url)
@@ -77,6 +87,10 @@ public class WebhookDeliveryService {
                     .toBodilessEntity();
             return true;
         } catch (RestClientException e) {
+            log.error("Webhook delivery failed: {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            log.error("Webhook delivery failed unexpected: {} - {}", e.getClass().getName(), e.getMessage());
             return false;
         }
     }

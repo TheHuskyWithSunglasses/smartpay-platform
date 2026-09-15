@@ -7,7 +7,7 @@ spring:
     hibernate.ddl-auto: none
     show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/smartpay_payments
+    url: jdbc:postgresql://localhost:5433/smartpay_payments
     username: smartpay
     password: example
   data:
@@ -21,3 +21,5 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
