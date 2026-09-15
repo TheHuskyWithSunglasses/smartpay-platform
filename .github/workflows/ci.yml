@@ -32,3 +32,23 @@ jobs:
         run: mvn clean verify -pl merchant-service,payment-service,notification-service,api-gateway --also-make
         env:
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      - name: Build Docker images
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/api-gateway:${{ github.sha }} ./api-gateway
+          docker build -t ghcr.io/${{ github.repository }}/merchant-service:${{ github.sha }} ./merchant-service
+          docker build -t ghcr.io/${{ github.repository }}/payment-service:${{ github.sha }} ./payment-service
+          docker build -t ghcr.io/${{ github.repository }}/notification-service:${{ github.sha }} ./notification-service
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker images
+        run: |
+          docker push ghcr.io/${{ github.repository }}/api-gateway:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/merchant-service:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/payment-service:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/notification-service:${{ github.sha }}
