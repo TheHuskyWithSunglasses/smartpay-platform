@@ -12,6 +12,7 @@ import com.smartpay.payment.mapper.PaymentMapper;
 import com.smartpay.payment.repository.PaymentRepository;
 import com.smartpay.payment.service.kafka.PaymentEventProducer;
 import com.smartpay.payment.specification.PaymentSpecifications;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -31,13 +32,13 @@ import static com.smartpay.payment.mapper.PaymentMapper.*;
 
 @Service
 @RequiredArgsConstructor
-public class
-PaymentService {
+public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentEventProducer paymentEventProducer;
     private final IdempotencyService idempotencyService;
 
+    @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest createPaymentRequest, UUID merchantId) {
         String idempotencyKey = createPaymentRequest.idempotencyKey();
 
