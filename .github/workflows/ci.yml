@@ -33,10 +33,10 @@ jobs:
 
       - name: Build Docker images
         run: |
-          docker build -t ghcr.io/${{ env.REPO_LOWER }}/api-gateway:${{ github.sha }} ./api-gateway
-          docker build -t ghcr.io/${{ env.REPO_LOWER }}/merchant-service:${{ github.sha }} ./merchant-service
-          docker build -t ghcr.io/${{ env.REPO_LOWER }}/payment-service:${{ github.sha }} ./payment-service
-          docker build -t ghcr.io/${{ env.REPO_LOWER }}/notification-service:${{ github.sha }} ./notification-service
+          docker build -t ghcr.io/${{ env.REPO_LOWER }}/api-gateway:${{ github.sha }} -f api-gateway/Dockerfile .
+          docker build -t ghcr.io/${{ env.REPO_LOWER }}/merchant-service:${{ github.sha }} -f merchant-service/Dockerfile .
+          docker build -t ghcr.io/${{ env.REPO_LOWER }}/payment-service:${{ github.sha }} -f payment-service/Dockerfile .
+          docker build -t ghcr.io/${{ env.REPO_LOWER }}/notification-service:${{ github.sha }} -f notification-service/Dockerfile .
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
