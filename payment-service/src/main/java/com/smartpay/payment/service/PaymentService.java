@@ -13,6 +13,7 @@ import com.smartpay.payment.repository.PaymentRepository;
 import com.smartpay.payment.service.kafka.PaymentEventProducer;
 import com.smartpay.payment.specification.PaymentSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,7 +31,8 @@ import static com.smartpay.payment.mapper.PaymentMapper.*;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentService {
+public class
+PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentEventProducer paymentEventProducer;
@@ -54,12 +56,21 @@ public class PaymentService {
         }
 
         // Create new payment
-        Payment payment = toPaymentEntity(createPaymentRequest, merchantId, PaymentStatus.PENDING);
-        paymentRepository.save(payment);
-        paymentEventProducer.publish(toPaymentEvent(payment, null));
-        PaymentResponse response = toPaymentResponse(payment);
-        idempotencyService.store(idempotencyKey, response);
-        return response;
+        try {
+            Payment payment = toPaymentEntity(createPaymentRequest, merchantId, PaymentStatus.PENDING);
+            paymentRepository.save(payment);
+            paymentEventProducer.publish(toPaymentEvent(payment, null));
+            PaymentResponse response = toPaymentResponse(payment);
+            idempotencyService.store(idempotencyKey, response);
+            return response;
+        } catch (DataIntegrityViolationException e) {
+            // Idempotency concurrence issue
+            Payment existingPayment = paymentRepository.findByIdempotencyKey(idempotencyKey)
+                    .orElseThrow(() -> new PaymentNotFoundException("Idempotency key constraint violated but payment not found"));
+            PaymentResponse response = toPaymentResponse(existingPayment);
+            idempotencyService.store(idempotencyKey, response);
+            return response;
+        }
     }
 
     public PaymentResponse getPayment(UUID paymentId) {
